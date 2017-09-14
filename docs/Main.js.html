@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Main.js - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Product.html">Product</a></li><li><a href="User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#elog">elog</a></li><li><a href="global.html#ENV">ENV</a></li><li><a href="global.html#getDigiKalaProducts">getDigiKalaProducts</a></li><li><a href="global.html#getNewProducts">getNewProducts</a></li><li><a href="global.html#log">log</a></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">Main.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// +--------------------------------+
+// |           &lt;Imports>            |
+// +________________________________+
+
+//Third-party libraries
+const
+    XPath = require('xpath'), // XPath query executor library
+    Cheerio = require('cheerio'), //Lets stick with cheer, XPath is not good for this part
+    Dom = require('xmldom').DOMParser, // Dom parser from plain strings
+    Request = require('request'), // Http Request helper
+    Rp = require('request-promise'), //Request promise for node
+    //R2 = require('r2'), //Successor of request
+    BotBrother = require('bot-brother'), // An stateful library for working with Telegram api
+    Promise = require('promise'), // Promises implementation in Node
+    FS = require("fs"), //Disk IO things
+    DotEnv = require('dotenv'), //Load .env values
+    Mongoose = require('mongoose'); // MongoDB object modeling
+
+
+require("./Helper/helper.js")(); //Adds all functions in helper.js to current namespace
+
+
+//=============Models================
+const User = require("./Models/User");
+const Product = require("./Models/Product");
+
+
+// +--------------------------------+
+// |          &lt;/Imports>            |
+// +________________________________+
+
+//|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-
+
+// +--------------------------------+
+// |          &lt;Config>              |
+// +________________________________+
+
+//============[Telegram]============
+const token = ENV("TELEGRAM_TOKEN"); // Bot api token
+const pollingConfig = {
+    interval: 0,
+    timeout: 65
+};
+
+//============[DigiKala]============
+const
+    DigiKalaURL = ENV('DigiKalaURL'),
+    digiKalaOffUrl = ENV('DIGIKALA_OFF_URL'), //JSON of promoted products
+    DigiKalaImagesUrl = ENV('DigiKalaImagesUrl');
+
+
+// +--------------------------------+
+// |         &lt;/Config>              |
+// +________________________________+
+
+//|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-
+
+// +--------------------------------+
+// |         &lt;Functions>            |
+// +________________________________+
+
+/**
+ * @return {Product[]} Offed products in DigiKala
+ */
+async function getDigiKalaProducts(){
+    let products = [];
+    //Get promted products as json from API
+    let json = await Rp({
+        uri: digiKalaOffUrl,
+        json: true
+    });
+
+    for (p_fulljson of json["responses"][0]["hits"]["hits"]){
+        let p_json = p_fulljson['_source'];
+        let p = new Product({
+            id: p_json["ProductId"],
+            name: p_json["FaTitle"],
+            url: DigiKalaURL+"/Product/DKP-"+p_json["ProductId"],
+            normalPrice: p_json["Price"],
+            currentPrice: p_json["Price"] - p_json["Discount"],
+            discountPercentage: Math.floor(((p_json["Price"] - p_json["Discount"])/p_json["Price"])*100),
+            discountValue: p_json["Discount"],
+            seller: "دیجی کالا",
+            details: [p_json["KeyFeatures"]],
+            thumbnails:[DigiKalaImagesUrl +  p_json['ProductImagePath'].replace("Original","220") ],
+            images:[DigiKalaImagesUrl + p_json['ProductImagePath']],
+            StartDateTime: p_json['StartDateTime'],
+            EndDateTime: p_json['EndDateTime'],
+        });
+        products.push(p);
+    }
+    return products;
+};
+
+/**
+ * @return {Promise&lt;Product[]>} A Promise that contains all captured Products
+ */
+const getNewProducts = () => {
+    return new Promise((ok,no)=>{ //Create a new promise
+        let producst = []; //products storage
+        getDigiKalaProducts().then((data,err)=>{ //get Products from digikala and appends it to var
+            if (!err){
+                producst.push(...data)
+            }
+            ok(producst);
+        });
+    });
+};
+
+// +--------------------------------+
+// |        &lt;/Functions>            |
+// +________________________________+
+
+//|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-
+
+
+// +--------------------------------+
+// |            &lt;Main>              |
+// +________________________________+
+
+
+let bot = BotBrother({
+    key: token,
+    sessionManager: BotBrother.sessionManager.memory(),
+    polling: pollingConfig
+});
+
+
+// +--------------------------------+
+// |           &lt;/Main>              |
+// +________________________________+
+
+
+//+--------------------------------+
+//|         BotCommands            |
+//+________________________________+
+// bot.command('show_all').answer((ct=>{
+//     getNewProducts.map(()=>{
+//         ct.sendMessage("Hi &lt;3")
+//     })
+// }));
+
+try{
+    getDigiKalaProducts().then((ok,no)=>{
+        console.log(ok)
+    });
+}catch (e){
+    console.error(`Error: ${e.message}`)
+}
+//getNewProducts()
+/*
+ Todo:Save data in mongo using Mongoose
+ Todo:Cron job or timer for jobs
+ Todo:Add Bamiloo products
+ */
+
+ </code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.4</a> on Fri Sep 15 2017 03:33:31 GMT+0430 (+0430) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>

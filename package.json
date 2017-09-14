@@ -1,0 +1,38 @@
+{
+  "name": "arzunyab_bot",
+  "version": "0.1.0",
+  "description": "Telegram bot to find promoted products in DigiKala and Bamiloo built with Nodejs Edit",
+  "main": "src/Main.js",
+  "scripts": {
+    "dev": "nodemon src/Main.js",
+    "build": "node_modules/.bin/jsdoc -r -c jsdoc.conf && nodemon src/Main.js",
+    "generate-docs": "node_modules/.bin/jsdoc -r -c jsdoc.conf"
+  },
+  "keywords": [
+    "telegram"
+  ],
+  "author": "digikala",
+  "license": "ISC",
+  "dependencies": {
+    "bot-brother": "^2.1.5",
+    "cheerio": "^1.0.0-rc.2",
+    "docdash": "^0.4.0",
+    "dotenv": "^4.0.0",
+    "global": "^4.3.2",
+    "mongodb": "^2.2.31",
+    "mongoose": "^4.11.11",
+    "promise": "^8.0.1",
+    "r2": "^1.0.0",
+    "request": "^2.81.0",
+    "request-promise": "^4.2.1",
+    "request-promise-native": "^1.0.4",
+    "request2": "^0.1.0",
+    "xmldom": "^0.1.27",
+    "xpath": "0.0.24"
+  },
+  "devDependencies": {
+    "jsdoc": "^3.5.4",
+    "loke-jsdoc-theme": "^2.1.0",
+    "nodemon": "^1.11.0"
+  }
+}
