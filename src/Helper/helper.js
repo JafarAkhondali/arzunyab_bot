@@ -2,13 +2,6 @@
  * @module helper
  * */
 
-
-const DotEnv = require('dotenv'); //Load .env values
-const result = DotEnv.config();//Read the config from .env file
-if (result.error) {
-    elog(result.error.message);
-}
-
 /**
  * @param {string} key name of the key used in env
  * @param {string} def value to use if key was empty
@@ -56,4 +49,12 @@ module.exports = function () {
     this.ENV = ENV;
     this.log = log;
     this.elog = elog;
+}
+
+
+
+const DotEnv = require('dotenv'); //Load .env values
+const result = DotEnv.config();//Read the config from .env file
+if (result.error) {
+    elog(result.error.message);
 }
