@@ -175,11 +175,9 @@ let bot = BotBrother({
 //+--------------------------------+
 //|         BotCommands            |
 //+________________________________+
-// bot.command('show_all').answer((ct=>{
-//     getNewProducts.map(()=>{
-//         ct.sendMessage("Hi <3")
-//     })
-// }));
+bot.command('hi').answer((ct=>{
+    ct.sendMessage("Hi <3")
+}));
 
 
 const options = {
@@ -204,8 +202,6 @@ db.once('open', () =>{
 });
 getNewProducts().then(ok=>{
     console.dir(ok, { depth: 3});
-
-
 }).catch(msg=>{
     elog(msg)
 });
