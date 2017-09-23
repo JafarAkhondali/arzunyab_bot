@@ -182,8 +182,8 @@ bot.command('hi').answer((ct=>{
 
 const options = {
     db: { native_parser: true },
-    user: MONGODB_USER,
-    pass: MONGODB_PASSWORD,
+    // user: MONGODB_USER,
+    // pass: MONGODB_PASSWORD,
     useMongoClient: true,
 }
 Mongoose.Promise = Promise;
