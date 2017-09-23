@@ -9,7 +9,7 @@ const
     Dom = require('xmldom').DOMParser, // Dom parser from plain strings
     Request = require('request'), // Http Request helper
     Rp = require('request-promise'), //Request promise for node
-    //R2 = require('r2'), //Successor of request
+//R2 = require('r2'), //Successor of request
     BotBrother = require('bot-brother'), // An stateful library for working with Telegram api
     Promise = require('bluebird'), // Promises implementation in Node
     Q = require('q'), // Another promise implementation, different features
@@ -189,20 +189,19 @@ const options = {
     useMongoClient: true,
 }
 Mongoose.Promise = Promise;
-// Mongoose.connect(MONGODB_URI, options);
-// const db = Mongoose.connection;
-// db.on('error', console.error.bind(console, 'connection error:'));
-// db.once('open', () =>{
-//     //products
-//     // getDigiKalaProducts().then((products,no)=>{
-//     //     if (no){
-//     //         elog(e.message,"Main.js");
-//     //     }else{
-//     //         products.map(product => product.save())
-//     //         log("Done");
-//     //     }
-//     // });
-// });
+Mongoose.connect(MONGODB_URI, options);
+const db = Mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', () =>{
+    getDigiKalaProducts().then((products,no)=>{
+        if (no){
+            elog(e.message,"Main.js");
+        }else{
+            //products.map(product => product.save())
+            log("Connection opened");
+        }
+    });
+});
 getNewProducts().then(ok=>{
     console.dir(ok, { depth: 3});
 
