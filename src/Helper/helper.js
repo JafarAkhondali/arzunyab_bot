@@ -1,3 +1,8 @@
+/**
+ * @module helper
+ * */
+
+
 const DotEnv = require('dotenv'); //Load .env values
 const result = DotEnv.config();//Read the config from .env file
 if (result.error) {
@@ -21,20 +26,25 @@ const ENV = (key,def)=>{
 
 /**
  * Logs general data
- * @param {string} message of log
- * @param {string} from where event has been occurred at
+ * @param {string} message Message of the log
+ * @param {string} from Where event has been occurred at
  * @param {string} type logging
  */
 const log = (message ,from="Somewhere",type="info") =>{
     let date = new Date().toISOString().replace('T', ' ').substr(0, 19);
+    let msg = `[${date}][${type}]${from}: ${message}`;
     if (ENV("DEBUG",true)){
-        console.log(`[${date}][${type}]${from}:${message}`)
+        if (type == 'info')
+            console.log(JSON.stringify(msg, null, 4));
+        else if(type =='error'){
+            console.error(msg);
+        }
     }
 }
 
 /**
  * Logs error
- * @param {string} message of log
+ * @param {string} message Message of log to print\store
  * @param {string} from of file error occurred at
  */
 const elog = (message,from="Somewhere") =>{

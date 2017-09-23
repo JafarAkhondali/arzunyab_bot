@@ -1,15 +1,19 @@
 const Mongoose = require('mongoose');
+const Util = require('util');
+const BaseModel = require('./BaseModel');
+
 /**
  * a Product which can be for sale
  * @class Product
  * */
 
-class Product extends Mongoose.Schema {
+class Product extends Mongoose.Schema{
     /**
      *  @constructs
      *  @extends Mongoose.Schema
-     *  @param {string} id Id of the product
-     *  @param {string} name Name of the product
+     *  @param {string} id Id of the product, Comes in SellerName+id format
+     *  @param {string} FaName Persian Name of the product
+     *  @param {string} EnName English Name of the product
      *  @param {string} url Full url of the product
      *  @param {Number} normalPrice NormalPrice of product
      *  @param {number} currentPrice Current price of Product
@@ -19,13 +23,18 @@ class Product extends Mongoose.Schema {
      *  @param {string} details Details of the product
      *  @param {string[]} thumbnails Thumbnails of the product
      *  @param {string[]} images Full urls of Images
-     *
+     *  @param {bool} isExists Determines whether the products is available or not
+     *  @param {date} StartDateTime DateTime of when this product promotion started
+     *  @param {date} EndDateTime DateTime of when this product promotion started
+     *  @property {date} createdAt DateTime to show date of creation
+     *  @property {date} updatedAt DateTime to show last time of change
      *
      */
     constructor(){
         super({
             id: String,
-            name: String,
+            FaName: String,
+            EnName: String,
             url: String,
             normalPrice: Number,
             currentPrice: Number,
@@ -35,11 +44,18 @@ class Product extends Mongoose.Schema {
             details: [String],
             thumbnails: [String],
             images: [String],
+            isExists: Boolean,
             StartDateTime: Date,
             EndDateTime: Date,
-            AddedDateTime:Date,
-            isFinished:Date,
+        }, {
+            timestamps: true
         })
     }
 }
-module.exports = Mongoose.model('Product',new Product);
+
+try{
+    Util.inherits(BaseModel, Product);
+    module.exports = Mongoose.model('Product',new Product);
+}catch (e){
+    elog(e)
+}
