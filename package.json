@@ -2,7 +2,7 @@
   "name": "arzunyab_bot",
   "version": "0.1.0",
   "description": "Telegram bot to find promoted products in DigiKala and Bamiloo built with Nodejs",
-  "main": "node src/Main.js",
+  "main": "src/Main.js",
   "engines": {
     "node": "8.4.0"
   },
@@ -13,6 +13,7 @@
     "generate-docs": "node_modules/.bin/jsdoc -r -c jsdoc.conf"
   },
   "keywords": [
+    "node",
     "telegram"
   ],
   "author": "digikala",
