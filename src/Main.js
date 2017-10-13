@@ -9,8 +9,8 @@ const
     Dom = require('xmldom').DOMParser, // Dom parser from plain strings
     Request = require('request'), // Http Request helper
     Rp = require('request-promise'), //Request promise for node
-//R2 = require('r2'), //Successor of request
-    BotBrother = require('bot-brother'), // An stateful library for working with Telegram api
+    //R2 = require('r2'), //Successor of request
+    Telegraf = require('telegraf'), // a Library for working with Telegram api
     Promise = require('bluebird'), // Promises implementation in Node
     Q = require('q'), // Another promise implementation, different features
     FS = require("fs"), //Disk IO things
@@ -19,13 +19,23 @@ const
 
 
 
+//Application libraries
+
+//=============[Helpers]================
 require("./Helper/helper.js")(); //Adds all functions in helper.js to current namespace
 
+//=============[Models]================
+const
+    User = require("./Models/User"),
+    Product = require("./Models/Product")
+    ;
 
-//=============Models================
-const User = require("./Models/User");
-const Product = require("./Models/Product");
 
+//=============[Telegram Bot]================
+
+const
+    PoromotionTelegramBot = require('./Bot/PoromotionTelegramBot')
+    ;
 
 // +--------------------------------+
 // |          </Imports>            |
@@ -41,7 +51,7 @@ const Product = require("./Models/Product");
 const token = ENV("TELEGRAM_TOKEN"); // Bot api token
 const pollingConfig = {
     interval: 0,
-    timeout: 65
+    timeout: 60
 };
 
 //============[DigiKala]============
@@ -86,6 +96,7 @@ async function getDigiKalaProducts(){
                     id: "digikala_"+p_json["ProductId"],
                     FaName: p_json["FaTitle"],
                     EnName: p_json["EnTitle"],
+                    FullName: p_json["FaTitle"] + p_json["EnTitle"],
                     url: DigiKalaURL + "/Product/DKP-" + p_json["ProductId"],
                     normalPrice: p_json["Price"],
                     currentPrice: p_json["Price"] - p_json["Discount"],
@@ -104,7 +115,10 @@ async function getDigiKalaProducts(){
         } catch (e) {
             no(e.message)
         }
-        return ok(products);
+        return ok({
+            products:products,
+            seller:'digikala'
+        });
     })
 };
 
@@ -117,7 +131,12 @@ async function getBamilooProducts(){
     return new Promise( async (ok, no)=> {
         let products = ['asd','sad'];
         try{
-            ok(products);
+            //TODO: Add Bamiloo products
+            no("Method not implented yet");
+            ok({
+                products:products,
+                seller:'bamiloo'
+            });
         }catch(e){
             no(e.message)
         }
@@ -134,7 +153,16 @@ const getNewProducts = async ()=>{
             getBamilooProducts()
         ];
         //Promise me to call back, ok? <3
-        Q.allSettled(allProducts).then((...arr)=>{});
+        Q.allSettled(allProducts).then((arr)=>{
+            ok({
+                ok:arr.filter(i=>i.state === 'fulfilled').map(i=>i.value),
+                no:arr.filter(i=>i.state !== 'fulfilled').map(i=>i.reason)
+            })
+            // ok({
+            //     ok:arr.filter(i=>i.state === 'fulfilled').map(i=>i.value),
+            //     no:arr.filter( (i=>i.state !== 'fulfilled').map(i=>i.value))
+            // })
+        });
         // let all = Promise.all(allProducts.map(function (promise) {
         //     return promise.reflect();
         // })).filter(function(promise) {return promise.isFulfilled();})
@@ -160,12 +188,14 @@ const getNewProducts = async ()=>{
 // +________________________________+
 
 
-let bot = BotBrother({
+
+
+let bot = new PoromotionTelegramBot({
     key: token,
     sessionManager: BotBrother.sessionManager.memory(),
     polling: pollingConfig
 });
-
+bot.Start();
 
 // +--------------------------------+
 // |           </Main>              |
@@ -175,40 +205,104 @@ let bot = BotBrother({
 //+--------------------------------+
 //|         BotCommands            |
 //+________________________________+
-bot.command('hi').answer((ct=>{
-    ct.sendMessage("Hi <3")
-}));
+// bot.command('hi').answer((ct=>{
+//     if(ct.message["text"]=="back"){
+//         log("IN BACK");
+//         return ct.goParent();
+//     }
+//     else
+//         return ct.sendMessage(ct.message["text"]);
+// }));
+
 
 
 const options = {
     db: { native_parser: true },
-    // user: MONGODB_USER,
-    // pass: MONGODB_PASSWORD,
     useMongoClient: true,
 }
+
+
 
 Mongoose.Promise = Promise;
 Mongoose.connect(MONGODB_URI, options);
 const db = Mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', () =>{
-    getDigiKalaProducts().then((products,no)=>{
-        if (no){
-            elog(e.message,"Main.js");
-        }else{
-            //products.map(product => product.save())
-            log("Connection opened");
-        }
+    log("connected");
+    log("Downloading ...");
+    getNewProducts().then(resultProducts=>{
+        console.dir(resultProducts);
+        log("Done downloading");
+
+        resultProducts.ok.map(sellerProducts=>{
+            let seller = sellerProducts.seller;
+            sellerProducts.products.map(product=>{
+                //product.searchUsers(); Todo Search user
+            })
+        })
+
+    }).catch(msg=>{
+        elog(msg)
     });
+
 });
-getNewProducts().then(ok=>{
-    console.dir(ok, { depth: 3});
-}).catch(msg=>{
-    elog(msg)
-});
-//getNewProducts()
+
 /*
- Todo:Save data in mongo using Mongoose
- Todo:Cron job or timer for jobs
- Todo:Add Bamiloo products
+
+ If user is searching for something new: TODO
+    Search all products, then behave with it like other users TODO
+
+ How to behave with other users: TODO
+     Periodically do a crawling: TODO
+         Perform a crawl to get all products in all sites
+         Foreach Product:
+             if Product id is duplicate in DB:
+                 if product.exists:
+                    Leave it
+             elif:
+                Move to trash
+             elif:
+                Add it to collection TODO
+                Do a search for it in all users() TODO
+
+
+
+
+
+
+
+ If user is searching for something new:
+ Search all products, then behave with it like other users
+
+ How to behave with other users:
+ Periodically do a crawling:
+ Perform a crawl to get all products in all sites
+ Foreach Product:
+ if Product id is duplicate in DB:
+ if product.exists:
+ Leave it
+ elif:
+ Move to trash
+ elif:
+ Add it to collection
+ Do a search for it in all users()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ Todo: Save data in mongo using Mongoose
+ Todo: Delete old products, Add new products, then search for item's user hasn't found already
+ Todo: Cron job or timer for jobs
  */

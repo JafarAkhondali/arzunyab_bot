@@ -3,7 +3,7 @@ const Util = require('util');
 const BaseModel = require('./BaseModel');
 
 /**
- * a Product which can be for sale
+ * a Product which is for sale with special offer on it
  * @class Product
  * */
 
@@ -14,6 +14,7 @@ class Product extends Mongoose.Schema{
      *  @param {string} id Id of the product, Comes in SellerName+id format
      *  @param {string} FaName Persian Name of the product
      *  @param {string} EnName English Name of the product
+     *  @param {string} FullName Composite name of product, used in search for best result
      *  @param {string} url Full url of the product
      *  @param {Number} normalPrice NormalPrice of product
      *  @param {number} currentPrice Current price of Product
@@ -35,6 +36,7 @@ class Product extends Mongoose.Schema{
             id: String,
             FaName: String,
             EnName: String,
+            FullName:String,
             url: String,
             normalPrice: Number,
             currentPrice: Number,
@@ -51,6 +53,20 @@ class Product extends Mongoose.Schema{
             timestamps: true
         })
     }
+    
+    searchUsers(){
+        return new Promise((ok,no)=>{
+            try{
+                let users = 
+                ok()
+            }catch (e){
+                no(e.message)
+            }
+        });
+    }
+
+
+
 }
 
 try{

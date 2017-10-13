@@ -4,7 +4,7 @@
 
 /**
  * @param {string} key name of the key used in env
- * @param {string} def value to use if key was empty
+ * @param {Object} def value to use if key was empty
  */
 const ENV = (key,def)=>{
     let val = process.env[key];
@@ -25,12 +25,14 @@ const ENV = (key,def)=>{
  */
 const log = (message ,from="Somewhere",type="info") =>{
     let date = new Date().toISOString().replace('T', ' ').substr(0, 19);
-    let msg = `[${date}][${type}]${from}: ${message}`;
+    let msg = `[${date}][${type}]${from}: `;
     if (ENV("DEBUG",true)){
-        if (type == 'info')
-            console.log(JSON.stringify(msg, null, 4));
+        if (type == 'info') {
+            console.log(msg);
+            console.dir(message, {depth: 1});
+        }
         else if(type =='error'){
-            console.error(msg);
+            console.error(msg+message);
         }
     }
 }

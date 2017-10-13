@@ -7,7 +7,7 @@
     "node": "8.4.0"
   },
   "scripts": {
-    "start":"node src/Main.js",
+    "start": "node src/Main.js",
     "dev": "nodemon src/Main.js",
     "build": "node_modules/.bin/jsdoc -r -c jsdoc.conf && nodemon src/Main.js",
     "generate-docs": "node_modules/.bin/jsdoc -r -c jsdoc.conf"
@@ -20,7 +20,6 @@
   "license": "ISC",
   "dependencies": {
     "bluebird": "^3.5.0",
-    "bot-brother": "^2.1.5",
     "cheerio": "^1.0.0-rc.2",
     "docdash": "^0.4.0",
     "dotenv": "^4.0.0",
@@ -30,6 +29,7 @@
     "q": "^1.5.0",
     "request": "^2.81.0",
     "request-promise": "^4.2.1",
+    "telegraf": "^3.13.0",
     "util": "^0.10.3",
     "xmldom": "^0.1.27",
     "xpath": "0.0.24"
