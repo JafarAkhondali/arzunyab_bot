@@ -1,71 +1,90 @@
-const BotBrother = require('telegraf'); // An stateful library for working with Telegram api
-
-
+const Telegraf = require('telegraf'); // An stateful library for working with Telegram api
+const { Extra, Markup } = require('telegraf');
+const Strings = require('../Strings/app-strings');
 
 /**
- * Logic of Telegram bot t
+ * Logic of Telegram bot for interactive communication with user and controller commands
  * @class Product
  * */
 
 //Currently ES6 lacks in const Variables for classes, So i'll just put them outside
 const
     KEYBOARD = {
-        "ADD_PRODUCT": [{'\xF0\x9F\x94\x8D	  جستجو کالا جدید': {go: 'add_product'}}],
-        "SHOW_ALL_PRODUCTS": [{'📦 دیدن کالاها 📦': {go: 'show_all_products'}}],
-        "SHOW_RANDOM_PRODUCT": [{'🎁 همینجوری یچیزی نشون بده 🎁': {go: 'show_random_product'}}],
-        "SHOW_ABOUTUS": [{'من کیم؟اینجا کجاس؟ کی منو نوشته؟ 😐': {go: 'show_aboutus'}}],
-        "HOME": [{'خانه': {go: 'home'}}],
-        "BACK": [{'بیخیال': {go: '$back'}}]
+        "HOME": 'خانه',
     },
-    className = "PromotionTelegramBot"
+    className = "PromotionTelegramBot",
+    MENU_WELCOME = [
+        [Strings.AddProduct],
+        [Strings.ShowRandomProduct],
+        [Strings.AboutMe],
+    ]
     ;
 
 
 class PoromotionTelegramBot{
     constructor(options){
-        this.bot = BotBrother(options);
+        this.bot = new Telegraf(options);
+        log("Bot Created",className)
     }
 
     Start(){
+        log("Bot started",className)
         // this.bot.keyboard([
         //     KEYBOARD.ADD_PRODUCT,
         //     KEYBOARD.SHOW_RANDOM_PRODUCT,
         //     KEYBOARD.SHOW_ABOUTUS
         // ]);
-        
-        this.bot.command('start').invoke((ctx)=> {
-            log("New user started",className)
-            return ctx.sendMessage('سلام\n' +
-                '\nکافیه به من بگی چی میخوای!' +
-                 '\nمن  هر روز برات توی تمام فروشگاه های معروف مثل دیجیکالا و بامیلو میگردم')
-        }).keyboard([
-            KEYBOARD.ADD_PRODUCT,
-            KEYBOARD.SHOW_RANDOM_PRODUCT,
-            KEYBOARD.SHOW_ABOUTUS
-        ]);
 
-        this.bot.command('add_product').invoke((ctx) =>{
-            log("Add Product",className);
-            return ctx.sendMessage('دنبال کالا جدید میگردی؟ کافیه فقط بخشی از اسمش رو اینجا وارد کنی!\n انگلیسی یا فارسی هم مهم نیست :hugging:')
-        }).keyboard([
-            KEYBOARD.BACK
-        ]);
+        // this.bot.command('start').invoke((ctx)=> {
+        //     log("New user started",className)
+        //     return ctx.sendMessage('سلام\n' +
+        //         '\nکافیه به من بگی چی میخوای!' +
+        //          '\nمن  هر روز برات توی تمام فروشگاه های معروف مثل دیجیکالا و بامیلو میگردم')
+        // }).keyboard([
+        //     KEYBOARD.ADD_PRODUCT,
+        //     KEYBOARD.SHOW_RANDOM_PRODUCT,
+        //     KEYBOARD.SHOW_ABOUTUS
+        // ]);
+        //
+        // this.bot.command('add_product').invoke((ctx) =>{
+        //     log("Add Product",className);
+        //     return ctx.sendMessage('دنبال کالا جدید میگردی؟ کافیه فقط بخشی از اسمش رو اینجا وارد کنی!\n انگلیسی یا فارسی هم مهم نیست :hugging:')
+        // }).keyboard([
+        //     KEYBOARD.BACK
+        // ]);
+        const bot = this.bot;
 
-        // bot.command('page1').invoke(function (ctx) {
-        //     bot.keyboard([
-        //         [{'بیخیال': {go: 'add_product'}}],
-        //         [{':two: مشاهده محصولات': {go: 'page2'}}],
-        //         [{':three: نمایش کالا تصادفی': {go: 'page3'}}]
-        //     ])
-        //     return ctx.sendMessage('This is page 2')
-        // })
-        // bot.command('page2').keyboard([
-        //     KEYBOARD.HOME,
-        //     [{':two: مشاهده محصولات': {go: 'page2'}}],
-        //     [{':three: نمایش کالا تصادفی': {go: 'page3'}}]
-        // ])
+        bot.command('/start', ({from,reply}) => {
+            //TODO: Add user in database here, if not exists
+            return reply(Strings.welcome(from.first_name),
+                Markup.keyboard(MENU_WELCOME)
+                    .oneTime()
+                    .resize()
+                    .extra()
+            )
+        })
+
+        bot.hears(Strings.Back, (ctx) => {
+            return reply(Strings.Cancel,
+                Markup.keyboard(MENU_WELCOME)
+                    .oneTime()
+                    .resize()
+                    .extra()
+            )
+        })
 
 
+        bot.hears(Strings.AddProduct, ({from,ctx}) => {
+            return reply(Strings.Back,
+                Markup.keyboard(MENU_WELCOME)
+                    .oneTime()
+                    .resize()
+                    .extra()
+            )
+        })
+
+
+        bot.startPolling();
     }
 }
 module.exports = PoromotionTelegramBot;

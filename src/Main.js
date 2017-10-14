@@ -48,7 +48,7 @@ const
 // +________________________________+
 
 //============[Telegram]============
-const token = ENV("TELEGRAM_TOKEN"); // Bot api token
+const PROMOTION_BOT_TOKEN = ENV("TELEGRAM_TOKEN"); // Bot api PROMOTION_BOT_TOKEN
 const pollingConfig = {
     interval: 0,
     timeout: 60
@@ -190,11 +190,7 @@ const getNewProducts = async ()=>{
 
 
 
-let bot = new PoromotionTelegramBot({
-    key: token,
-    sessionManager: BotBrother.sessionManager.memory(),
-    polling: pollingConfig
-});
+let bot = new PoromotionTelegramBot(PROMOTION_BOT_TOKEN);
 bot.Start();
 
 // +--------------------------------+
