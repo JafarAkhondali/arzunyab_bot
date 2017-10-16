@@ -10,6 +10,7 @@ class User extends Mongoose.Schema {
      *  @extends Mongoose.Schema
      *  @param {number} id User id in Telegram
      *  @param {number} chatId chatId in Telegram
+     *  @param {string} username of User in Telegram
      *  @param {string} first_name of User in Telegram
      *  @param {string} last_name of User in Telegram
      *  @param {string} mob Tell of User in Telegram
@@ -22,6 +23,7 @@ class User extends Mongoose.Schema {
         super({
             id: String,
             chatId: String,
+            username: String,
             first_name: String,
             last_name: String,
             mob: String,

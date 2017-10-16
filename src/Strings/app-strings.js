@@ -17,12 +17,12 @@ class Strings {
     }
 
 
-    static get Cancel(){
-        return `اکی 😊`;
+    static get Ok(){
+        return `خب نخواه 😐 خودت پیام دادی، من که زورت نکردم!`;
     }
     
     static get Back(){
-        return 'بیخیال 🔙';
+        return 'نمیخوام😐 🔙';
     }
     
     static get AddProduct(){

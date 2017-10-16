@@ -1,6 +1,8 @@
-const Telegraf = require('telegraf'); // An stateful library for working with Telegram api
-const { Extra, Markup } = require('telegraf');
-const Strings = require('../Strings/app-strings');
+const Telegraf = require('telegraf') // An stateful library for working with Telegram api
+const { Extra, Markup, Router,memorySession } = require('telegraf')
+const Strings = require('../Strings/app-strings')
+const TelegrafFlow = require('telegraf-flow')
+const { WizardScene } = TelegrafFlow
 
 /**
  * Logic of Telegram bot for interactive communication with user and controller commands
@@ -17,8 +19,42 @@ const
         [Strings.AddProduct],
         [Strings.ShowRandomProduct],
         [Strings.AboutMe],
+    ],
+    MENU_CANCEL = [
+        [Strings.Back]
     ]
+
     ;
+
+
+//=================[Flows]======================
+//This functions will show the flows of the app
+const AddProductFlow = new WizardScene('AddProductFlow',
+    (ctx) => {
+        ctx.reply('Step 1')
+        ctx.flow.wizard.next()
+    },
+    (ctx) => {
+        if (ctx.message && ctx.message.text !== 'ok') {
+            return ctx.replyWithMarkdown('Send `ok`')
+        }
+        ctx.reply('Step 2 ')
+        ctx.flow.wizard.next()
+    },
+    (ctx) => {
+        ctx.reply('Step 3')
+        ctx.flow.wizard.next()
+    },
+    (ctx) => {
+        ctx.reply('Step 4')
+        ctx.flow.wizard.next()
+    },
+    (ctx) => {
+        ctx.reply('Done')
+        ctx.flow.leave()
+    }
+)
+
 
 
 class PoromotionTelegramBot{
@@ -26,6 +62,11 @@ class PoromotionTelegramBot{
         this.bot = new Telegraf(options);
         log("Bot Created",className)
     }
+
+    test(){
+        log("Entered Test")
+    }
+
 
     Start(){
         log("Bot started",className)
@@ -56,6 +97,7 @@ class PoromotionTelegramBot{
 
         bot.command('/start', ({from,reply}) => {
             //TODO: Add user in database here, if not exists
+            log(from,className);
             return reply(Strings.welcome(from.first_name),
                 Markup.keyboard(MENU_WELCOME)
                     .oneTime()
@@ -64,8 +106,8 @@ class PoromotionTelegramBot{
             )
         })
 
-        bot.hears(Strings.Back, (ctx) => {
-            return reply(Strings.Cancel,
+        bot.hears(Strings.Back, ({reply}) => {
+            return reply(Strings.Ok,
                 Markup.keyboard(MENU_WELCOME)
                     .oneTime()
                     .resize()
@@ -74,9 +116,11 @@ class PoromotionTelegramBot{
         })
 
 
-        bot.hears(Strings.AddProduct, ({from,ctx}) => {
-            return reply(Strings.Back,
-                Markup.keyboard(MENU_WELCOME)
+        bot.hears(Strings.AddProduct, ({from,ctx,reply}) => {
+            const flow = new TelegrafFlow([AddProductFlow], {defaultScene: 'AddProductFlow'})
+            bot.use(flow.middleware())
+            return reply("یه تیکه از اسم کالات رو بگو  😊",
+                Markup.keyboard(MENU_CANCEL)
                     .oneTime()
                     .resize()
                     .extra()
@@ -84,6 +128,7 @@ class PoromotionTelegramBot{
         })
 
 
+        bot.use(Telegraf.memorySession())
         bot.startPolling();
     }
 }
