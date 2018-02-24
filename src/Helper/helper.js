@@ -47,10 +47,44 @@ const elog = (message,from="Somewhere") =>{
 }
 
 
+const escapeToRegex = (str)=>{
+    let escaped = escape(str).replace(/%/g,'-\\');
+    if (escaped.charAt(0)=="-")
+        escaped = escaped.substring(1)
+    escaped = "["+escaped+"]";
+    return escaped;
+}
+
+/**
+ * Used for convert Arabic characters to Persian
+ *
+ * @api private
+ * @method _arabicChar
+ * @param {String} value
+ * @return {Object} PersianJs Object
+ */
+function ToPersian(value) {
+    if (!value) {
+        return;
+    }
+    var arabicChars = ["ي", "ك", "‍", "دِ", "بِ", "زِ", "ذِ", "ِشِ", "ِسِ", "‌", "ى"],
+        persianChars = ["ی", "ک", "", "د", "ب", "ز", "ذ", "ش", "س", "", "ی"];
+
+    for (var i = 0, charsLen = arabicChars.length; i < charsLen; i++) {
+        value = value.replace(new RegExp(arabicChars[i], "g"), persianChars[i]);
+    }
+    return value;
+}
+
+
+
+
 module.exports = function () {
     this.ENV = ENV;
     this.log = log;
     this.elog = elog;
+    this.escapeToRegex = escapeToRegex ;
+    this.ToPersian = ToPersian;
 }
 
 

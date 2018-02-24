@@ -15,7 +15,11 @@ const
     Q = require('q'), // Another promise implementation, different features
     FS = require("fs"), //Disk IO things
     DotEnv = require('dotenv'), //Load .env values
-    Mongoose = require('mongoose'); // MongoDB object modeling
+    Mongoose = require('mongoose'), // MongoDB object modeling
+    Unique = require('array-unique') //Fast implementation of unique in arrays
+    ;
+
+
 
 
 
@@ -96,7 +100,7 @@ async function getDigiKalaProducts(){
                     id: "digikala_"+p_json["ProductId"],
                     FaName: p_json["FaTitle"],
                     EnName: p_json["EnTitle"],
-                    FullName: p_json["FaTitle"] + p_json["EnTitle"],
+                    FullName: Unique(ToPersian((p_json["FaTitle"] +" "+ p_json["EnTitle"])).split(" ")),
                     url: DigiKalaURL + "/Product/DKP-" + p_json["ProductId"],
                     normalPrice: p_json["Price"],
                     currentPrice: p_json["Price"] - p_json["Discount"],
@@ -188,52 +192,44 @@ const getNewProducts = async ()=>{
 // +________________________________+
 
 
-
-
 let bot = new PoromotionTelegramBot(PROMOTION_BOT_TOKEN);
-bot.Start();
+
 
 // +--------------------------------+
 // |           </Main>              |
 // +________________________________+
 
 
-//+--------------------------------+
-//|         BotCommands            |
-//+________________________________+
-// bot.command('hi').answer((ct=>{
-//     if(ct.message["text"]=="back"){
-//         log("IN BACK");
-//         return ct.goParent();
-//     }
-//     else
-//         return ct.sendMessage(ct.message["text"]);
-// }));
-
-
-
 const options = {
     db: { native_parser: true },
     useMongoClient: true,
+    config: { autoIndex: false }
 }
-
-
 
 Mongoose.Promise = Promise;
 Mongoose.connect(MONGODB_URI, options);
 const db = Mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', () =>{
-    log("connected");
+    log("connected to mongo database");
+
+
+    log("Starting bot...");
+    bot.Start();    //Start the bot
+    log("Bot started!");
+
     log("Downloading ...");
     getNewProducts().then(resultProducts=>{
         console.dir(resultProducts);
-        log("Done downloading");
+        log("Done downloading products");
 
         resultProducts.ok.map(sellerProducts=>{
             let seller = sellerProducts.seller;
+            log("Adding products")
             sellerProducts.products.map(product=>{
                 //product.searchUsers(); Todo Search user
+                product.save();
+                log("A product added");
             })
         })
 

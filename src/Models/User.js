@@ -21,6 +21,7 @@ class User extends Mongoose.Schema {
      */
     constructor(){
         super({
+            _id: String,
             id: String,
             chatId: String,
             username: String,

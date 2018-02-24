@@ -3,7 +3,7 @@ const { Extra, Markup, Router,memorySession } = require('telegraf')
 const Strings = require('../Strings/app-strings')
 const TelegrafFlow = require('telegraf-flow')
 const { WizardScene } = TelegrafFlow
-
+const User = require('../Models/User');
 /**
  * Logic of Telegram bot for interactive communication with user and controller commands
  * @class Product
@@ -11,9 +11,6 @@ const { WizardScene } = TelegrafFlow
 
 //Currently ES6 lacks in const Variables for classes, So i'll just put them outside
 const
-    KEYBOARD = {
-        "HOME": 'خانه',
-    },
     className = "PromotionTelegramBot",
     MENU_WELCOME = [
         [Strings.AddProduct],
@@ -31,7 +28,8 @@ const
 //This functions will show the flows of the app
 const AddProductFlow = new WizardScene('AddProductFlow',
     (ctx) => {
-        ctx.reply('Step 1')
+        let {from} = ctx;
+        log(from);
         ctx.flow.wizard.next()
     },
     (ctx) => {
@@ -42,18 +40,11 @@ const AddProductFlow = new WizardScene('AddProductFlow',
         ctx.flow.wizard.next()
     },
     (ctx) => {
-        ctx.reply('Step 3')
-        ctx.flow.wizard.next()
-    },
-    (ctx) => {
-        ctx.reply('Step 4')
-        ctx.flow.wizard.next()
-    },
-    (ctx) => {
         ctx.reply('Done')
         ctx.flow.leave()
     }
 )
+
 
 
 
@@ -96,8 +87,25 @@ class PoromotionTelegramBot{
         const bot = this.bot;
 
         bot.command('/start', ({from,reply}) => {
-            //TODO: Add user in database here, if not exists
-            log(from,className);
+            //Add user in database, if not exists
+            let user = new User();
+            user.id = from.id;
+            user.is_bot = from.is_bot;
+            user.username = from.username;
+            user.first_name = from.first_name;
+            user.last_name = from.last_name;
+            // user.save(function (err, user) {
+            //     if (err) return console.error(err);
+            //     log("Saved!")
+            //     log(user)
+            // });
+            User.findOneAndUpdate({id: from.id}, user, { upsert: true }).then((err, doc)=>{
+                if(err){
+                    log("Something wrong ");
+                }
+                log("Done saving");
+            });
+
             return reply(Strings.welcome(from.first_name),
                 Markup.keyboard(MENU_WELCOME)
                     .oneTime()
@@ -119,7 +127,7 @@ class PoromotionTelegramBot{
         bot.hears(Strings.AddProduct, ({from,ctx,reply}) => {
             const flow = new TelegrafFlow([AddProductFlow], {defaultScene: 'AddProductFlow'})
             bot.use(flow.middleware())
-            return reply("یه تیکه از اسم کالات رو بگو  😊",
+            return reply(Strings.ICanSearch,
                 Markup.keyboard(MENU_CANCEL)
                     .oneTime()
                     .resize()

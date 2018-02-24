@@ -19,6 +19,7 @@
   "author": "digikala",
   "license": "ISC",
   "dependencies": {
+    "array-unique": "^0.3.2",
     "bluebird": "^3.5.0",
     "cheerio": "^1.0.0-rc.2",
     "docdash": "^0.4.0",

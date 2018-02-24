@@ -17,6 +17,10 @@ class Strings {
     }
 
 
+    static get ICanSearch(){
+        return `یه تیکه از اسم محصولی که دنبالشی رو بگو (انگلیسی یا فارسی فرقی نمیکنه)`;
+    }
+
     static get Ok(){
         return `خب نخواه 😐 خودت پیام دادی، من که زورت نکردم!`;
     }
@@ -38,7 +42,7 @@ class Strings {
     }
     
     static get AboutMe(){
-        return 'کی منو نوشته؟ کُدم کو؟ 😐';
+        return 'من کیم؟ اینجا کجاس؟ کی منو نوشته؟ 😐';
     }
     
 }

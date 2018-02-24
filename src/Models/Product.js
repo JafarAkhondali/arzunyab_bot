@@ -14,7 +14,7 @@ class Product extends Mongoose.Schema{
      *  @param {string} id Id of the product, Comes in SellerName+id format
      *  @param {string} FaName Persian Name of the product
      *  @param {string} EnName English Name of the product
-     *  @param {string} FullName Composite name of product, used in search for best result
+     *  @param {string} FullName Composite name of product, keyword base
      *  @param {string} url Full url of the product
      *  @param {Number} normalPrice NormalPrice of product
      *  @param {number} currentPrice Current price of Product
@@ -36,7 +36,7 @@ class Product extends Mongoose.Schema{
             id: String,
             FaName: String,
             EnName: String,
-            FullName:String,
+            FullName: { type: [String], index: 'hashed' },
             url: String,
             normalPrice: Number,
             currentPrice: Number,
