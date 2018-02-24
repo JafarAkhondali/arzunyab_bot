@@ -17,34 +17,87 @@ class Strings {
     }
 
 
+    /**
+     * @return {string}
+     */
     static get ICanSearch(){
         return `یه تیکه از اسم محصولی که دنبالشی رو بگو (انگلیسی یا فارسی فرقی نمیکنه)`;
     }
 
-    static get Ok(){
-        return `خب نخواه 😐 خودت پیام دادی، من که زورت نکردم!`;
+    /**
+     * @return {string}
+     */
+    static get HeDontWant(){
+        return `خب نخواه 😐 به کفشم 😐 خودت پیام دادی، من که زورت نکردم!`;
     }
-    
+
+    /**
+     * @return {string}
+     */
     static get Back(){
         return 'نمیخوام😐 🔙';
     }
-    
+
+    /**
+     * @return {string}
+     */
     static get AddProduct(){
         return '🔍 جستجو کالا جدید 🔎';
     }
-    
+
+    /**
+     * @return {string}
+     */
     static get ShowRandomProduct(){
         return '🎁 همینجوری یچیزی نشون بده 🎁';
     }
-    
+
+    /**
+     * @return {string}
+     */
     static get ShowMyProducts(){
         return '📦 دیدن کالاهای من 📦';
     }
-    
+
+    /**
+     * @return {string}
+     */
     static get AboutMe(){
         return 'من کیم؟ اینجا کجاس؟ کی منو نوشته؟ 😐';
     }
-    
+
+    /**
+     * @return {string}
+     */
+    static get LetMeSeeWhatCanIFind(){
+        return "بزار ببینم واست چی پیدا میشه کاکو";
+    }
+
+
+    /**
+     * @return {string}
+     */
+    static get ProductNotAvailbleNow(){
+        return " شت 😐 این کالا الان تخفیف سفت نخورده، ولی من مرتب میگردم اگه پیدا کردم جنگی میگمت 😐🤚🏻";
+    }
+
+
+    /**
+     * @return {string}
+     */
+    static get FinishedFindingArticles(){
+        return `ناموسا اوردت؟ 😐 
+بچه جنوب ایطور بات مینویسه‌ 😐         
+        `;
+    }
+
+
+    /**
+     * @return {string}
+     */
+    static ViewProduct(seller) {
+        return `❤مشاهده اطلاعات کامل در ${seller}❤️`
+    }
 }
 
 module.exports = Strings; 

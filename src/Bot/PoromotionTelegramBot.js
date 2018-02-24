@@ -16,6 +16,7 @@ const
     MENU_WELCOME = [
         [Strings.AddProduct],
         [Strings.ShowRandomProduct],
+        [Strings.ShowMyProducts],
         [Strings.AboutMe],
     ],
     MENU_CANCEL = [
@@ -25,37 +26,65 @@ const
     ;
 
 
+
+
+
+
+
+function ShowProductInfo(ctx, product, keyboardCallBack) {
+    const dafuq = product.getInfo();
+    const replyOptions = Markup.inlineKeyboard([
+        Markup.urlButton(Strings.ViewProduct(product.seller), product.url)
+    ]).extra();
+
+    ctx.replyWithPhoto(product.images[0], replyOptions).then((ok,no)=>{
+        if (ok){
+            ctx.reply(dafuq ,Telegraf.Extra
+                .markdown()
+                .markup(keyboardCallBack));
+        }
+    });
+}
+
+
+
+
+
+
 //=================[Flows]======================
 //This functions will show the flows of the app
+
 const AddProductFlow = new WizardScene('AddProductFlow',
     (ctx) => {
-        ctx.reply("بزار ببینم واست چی پیدا میشه کاکو");
+        // if (!(ctx.message && ctx.message.text)){
+        //     return;
+        // }
+        if (ctx.message.text == "حله ❤️"){
+            ctx.flow.leave();
+            return ctx.reply(Strings.FinishedFindingArticles);
+        }
+        // log(ctx.message.text)
+        ctx.reply(Strings.LetMeSeeWhatCanIFind);
         Product.searchTitle(ctx.message.text).then((res, err)=> {
             if (err)
                 elog(err);
             if (err || res.length === 0) {
-                ctx.reply(" شت 😐 این کالا الان تخفیف سفت نخورده، ولی من مرتب میگردم اگه پیدا کردم جنگی میگمت 😐🤚🏻")
+                ctx.reply(Strings.ProductNotAvailbleNow);
             } else {
                 let product = res[0];
-                console.log(product);
-                const replyOptions = Markup.inlineKeyboard([
-                    Markup.urlButton('❤مشاهده اطلاعات کامل در دیجیکالا❤️', product.url)
-                ]).extra()
-                replyOptions.caption = product.getInfo();
-                replyOptions.keyboard =[
-                    [Strings.AddProduct],
-                ]
-                ctx.replyWithPhoto(product.images[0], replyOptions)
-
-                ;
-                //ctx.flow.wizard.next()
+                ShowProductInfo(ctx, product,(m) => m.keyboard([
+                    m.callbackButton('حله ❤️','solved'),
+                    m.callbackButton('دیگه چی؟ 😐','else')
+                ]).resize());
             }
         });
-    },
-    (ctx) => {
-        ctx.reply('Done')
-        ctx.flow.leave()
-    }
+
+
+
+    }//,
+    // (ctx) => {
+    //     ctx.flow.leave();
+    // }
 );
 
 
@@ -64,6 +93,7 @@ class PoromotionTelegramBot{
     constructor(options){
         this.bot = new Telegraf(options);
         log("Bot Created",className)
+        this.ctx=null;
     }
 
     test(){
@@ -73,23 +103,8 @@ class PoromotionTelegramBot{
 
     Start(){
         log("Bot started",className)
-        // this.bot.keyboard([
-        //     KEYBOARD.ADD_PRODUCT,
-        //     KEYBOARD.SHOW_RANDOM_PRODUCT,
-        //     KEYBOARD.SHOW_ABOUTUS
-        // ]);
-
-        // this.bot.command('start').invoke((ctx)=> {
-        //     log("New user started",className)
-        //     return ctx.sendMessage('سلام\n' +
-        //         '\nکافیه به من بگی چی میخوای!' +
-        //          '\nمن  هر روز برات توی تمام فروشگاه های معروف مثل دیجیکالا و بامیلو میگردم')
-        // }).keyboard([
-        //     KEYBOARD.ADD_PRODUCT,
-        //     KEYBOARD.SHOW_RANDOM_PRODUCT,
-        //     KEYBOARD.SHOW_ABOUTUS
-        // ]);
         const bot = this.bot;
+
 
         bot.command('/start', ({from,reply}) => {
             //Add user in database, if not exists
@@ -99,16 +114,12 @@ class PoromotionTelegramBot{
             user.username = from.username;
             user.first_name = from.first_name;
             user.last_name = from.last_name;
-            // user.save(function (err, user) {
-            //     if (err) return console.error(err);
-            //     log("Saved!")
-            //     log(user)
-            // });
+
             User.findOneAndUpdate({id: from.id}, user, { upsert: true }).then((err, doc)=>{
                 if(err){
-                    log("Something wrong ");
-                }
-                log("Done saving");
+                    elog("Something wrong :|" + err,"Create User ");
+                }else
+                    log("User saved");
             });
 
             return reply(Strings.welcome(from.first_name),
@@ -119,8 +130,10 @@ class PoromotionTelegramBot{
             )
         })
 
+
+
         bot.hears(Strings.Back, ({reply}) => {
-            return reply(Strings.Ok,
+            return reply(Strings.HeDontWant,
                 Markup.keyboard(MENU_WELCOME)
                     .oneTime()
                     .resize()
@@ -128,10 +141,37 @@ class PoromotionTelegramBot{
             )
         })
 
+        bot.hears("حله ❤️", ({reply}) => {
+            return reply(Strings.FinishedFindingArticles,
+                Markup.keyboard(MENU_WELCOME)
+                    .oneTime()
+                    .resize()
+                    .extra()
+            )
+        });
+
+        bot.hears([Strings.ShowRandomProduct,"دیگه چی؟ 😐"], (ctx) => {
+            Product.aggregate([{$sample: { size:1 }}]).then((ok,no)=>{
+                if (ok){
+                    let product = ok[0];
+                    Product.findById(product._id).then((finded, failed)=>{
+                        ShowProductInfo(ctx, finded,(m) => m.keyboard([
+                            m.callbackButton('حله ❤️','solved'),
+                            m.callbackButton('دیگه چی؟ 😐',Strings.ShowRandomProduct)
+                        ]).resize());
+
+
+                        return ctx.reply(Strings.LetMeSeeWhatCanIFind)
+                    });
+
+                }
+            });
+        })
+
 
         bot.hears(Strings.AddProduct, ({from,ctx,reply}) => {
-            const flow = new TelegrafFlow([AddProductFlow], {defaultScene: 'AddProductFlow'})
-            bot.use(flow.middleware())
+            const flow = new TelegrafFlow([AddProductFlow], {defaultScene: 'AddProductFlow'});
+            bot.use(flow.middleware());
             return reply(Strings.ICanSearch,
                 Markup.keyboard(MENU_CANCEL)
                     .oneTime()
@@ -139,6 +179,11 @@ class PoromotionTelegramBot{
                     .extra()
             )
         })
+
+
+
+
+
 
 
         bot.use(Telegraf.session())

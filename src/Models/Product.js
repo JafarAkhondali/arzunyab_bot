@@ -67,6 +67,8 @@ const {BaseModel,BaseSchema} = require('./BaseModel');
 // }
 
 try{
+    const PersianFormatter = new Intl.NumberFormat('fa-IR', { maximumSignificantDigits: 3 });
+
     const ProductSchema = new Schema({
         id: String,
         FaName: String,
@@ -93,12 +95,22 @@ try{
                 .limit(1)
         }
     }
+
     ProductSchema.methods ={
         getInfo: function(){
+
+
             const text =`نام محصول: ${this.FaName || ''}
+            
             ${this.EnName || ''}
+            
 توضیحات:  
 ${this.details[0] || ''}
+
+قیمت اصلی: ${PersianFormatter.format(this.normalPrice/10)} تومان 
+قیمت فعلی: ${PersianFormatter.format(this.currentPrice/10)}  تومان 
+تخفیف: % ${this.discountPercentage} 
+
             `;
             return text;
         }
