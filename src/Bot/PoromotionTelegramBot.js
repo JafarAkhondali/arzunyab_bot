@@ -1,9 +1,10 @@
-const Telegraf = require('telegraf') // An stateful library for working with Telegram api
-const { Extra, Markup, Router,memorySession } = require('telegraf')
-const Strings = require('../Strings/app-strings')
-const TelegrafFlow = require('telegraf-flow')
-const { WizardScene } = TelegrafFlow
+const Telegraf = require('telegraf'); // An stateful library for working with Telegram api
+const { Extra, Markup, Router,session } = require('telegraf');
+const Strings = require('../Strings/app-strings');
+const TelegrafFlow = require('telegraf-flow');
+const { WizardScene } = TelegrafFlow;
 const User = require('../Models/User');
+const Product = require('../Models/Product');
 /**
  * Logic of Telegram bot for interactive communication with user and controller commands
  * @class Product
@@ -28,23 +29,34 @@ const
 //This functions will show the flows of the app
 const AddProductFlow = new WizardScene('AddProductFlow',
     (ctx) => {
-        let {from} = ctx;
-        log(from);
-        ctx.flow.wizard.next()
-    },
-    (ctx) => {
-        if (ctx.message && ctx.message.text !== 'ok') {
-            return ctx.replyWithMarkdown('Send `ok`')
-        }
-        ctx.reply('Step 2 ')
-        ctx.flow.wizard.next()
+        ctx.reply("بزار ببینم واست چی پیدا میشه کاکو");
+        Product.searchTitle(ctx.message.text).then((res, err)=> {
+            if (err)
+                elog(err);
+            if (err || res.length === 0) {
+                ctx.reply(" شت 😐 این کالا الان تخفیف سفت نخورده، ولی من مرتب میگردم اگه پیدا کردم جنگی میگمت 😐🤚🏻")
+            } else {
+                let product = res[0];
+                console.log(product);
+                const replyOptions = Markup.inlineKeyboard([
+                    Markup.urlButton('❤مشاهده اطلاعات کامل در دیجیکالا❤️', product.url)
+                ]).extra()
+                replyOptions.caption = product.getInfo();
+                replyOptions.keyboard =[
+                    [Strings.AddProduct],
+                ]
+                ctx.replyWithPhoto(product.images[0], replyOptions)
+
+                ;
+                //ctx.flow.wizard.next()
+            }
+        });
     },
     (ctx) => {
         ctx.reply('Done')
         ctx.flow.leave()
     }
-)
-
+);
 
 
 
@@ -76,13 +88,6 @@ class PoromotionTelegramBot{
         //     KEYBOARD.ADD_PRODUCT,
         //     KEYBOARD.SHOW_RANDOM_PRODUCT,
         //     KEYBOARD.SHOW_ABOUTUS
-        // ]);
-        //
-        // this.bot.command('add_product').invoke((ctx) =>{
-        //     log("Add Product",className);
-        //     return ctx.sendMessage('دنبال کالا جدید میگردی؟ کافیه فقط بخشی از اسمش رو اینجا وارد کنی!\n انگلیسی یا فارسی هم مهم نیست :hugging:')
-        // }).keyboard([
-        //     KEYBOARD.BACK
         // ]);
         const bot = this.bot;
 
@@ -136,7 +141,7 @@ class PoromotionTelegramBot{
         })
 
 
-        bot.use(Telegraf.memorySession())
+        bot.use(Telegraf.session())
         bot.startPolling();
     }
 }

@@ -3,9 +3,6 @@
   "version": "0.1.0",
   "description": "Telegram bot to find promoted products in DigiKala and Bamiloo built with Nodejs",
   "main": "src/Main.js",
-  "engines": {
-    "node": "8.4.0"
-  },
   "scripts": {
     "start": "node src/Main.js",
     "dev": "nodemon src/Main.js",
@@ -16,7 +13,7 @@
     "node",
     "telegram"
   ],
-  "author": "digikala",
+  "author": "Jafar Akhondali",
   "license": "ISC",
   "dependencies": {
     "array-unique": "^0.3.2",
@@ -26,13 +23,13 @@
     "dotenv": "^4.0.0",
     "global": "^4.3.2",
     "localize": "^0.4.7",
-    "mongodb": "^2.2.31",
-    "mongoose": "^4.11.11",
+    "mongodb": ">=3",
+    "mongoose": ">=5",
     "q": "^1.5.0",
     "remove": "^0.1.5",
     "request": "^2.81.0",
     "request-promise": "^4.2.1",
-    "telegraf": "^3.13.0",
+    "telegraf": "latest",
     "telegraf-flow": "^8.3.0",
     "util": "^0.10.3",
     "xmldom": "^0.1.27",
@@ -41,6 +38,6 @@
   "devDependencies": {
     "jsdoc": "^3.5.4",
     "loke-jsdoc-theme": "^2.1.0",
-    "nodemon": "^1.11.0"
+    "nodemon": "latest"
   }
 }

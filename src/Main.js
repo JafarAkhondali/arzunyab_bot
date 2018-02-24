@@ -100,8 +100,9 @@ async function getDigiKalaProducts(){
                     id: "digikala_"+p_json["ProductId"],
                     FaName: p_json["FaTitle"],
                     EnName: p_json["EnTitle"],
-                    FullName: Unique(ToPersian((p_json["FaTitle"] +" "+ p_json["EnTitle"])).split(" ")),
-                    url: DigiKalaURL + "/Product/DKP-" + p_json["ProductId"],
+                    // FullName: Unique(ToPersian((p_json["FaTitle"] +" "+ p_json["EnTitle"])).split(" ")),
+                    FullName: p_json["FaTitle"] +" "+ p_json["EnTitle"],
+                    url: DigiKalaURL + "Product/DKP-" + p_json["ProductId"],
                     normalPrice: p_json["Price"],
                     currentPrice: p_json["Price"] - p_json["Discount"],
                     discountPercentage: Math.floor(((p_json["Price"] - p_json["Discount"]) / p_json["Price"]) * 100),
@@ -136,7 +137,7 @@ async function getBamilooProducts(){
         let products = ['asd','sad'];
         try{
             //TODO: Add Bamiloo products
-            no("Method not implented yet");
+            no("Method not implemented yet");
             ok({
                 products:products,
                 seller:'bamiloo'
@@ -202,8 +203,7 @@ let bot = new PoromotionTelegramBot(PROMOTION_BOT_TOKEN);
 
 const options = {
     db: { native_parser: true },
-    useMongoClient: true,
-    config: { autoIndex: false }
+    // config: { autoIndex: false }
 }
 
 Mongoose.Promise = Promise;
